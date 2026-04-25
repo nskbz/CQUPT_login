@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "composite": true,
+        "declaration": true,
+        "stripInternal": true,
+        "outDir": "../dist/share",
+        "module": "nodenext",
+        "target": "esnext",
+        "types": [
+            "node"
+        ],
+    },
+    "include": [
+        "**/*.ts"
+    ]
+}

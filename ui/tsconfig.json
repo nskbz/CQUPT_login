@@ -1,0 +1,27 @@
+{ // Visit https://aka.ms/tsconfig to read more about this file
+    "compilerOptions": {
+        "outDir": "../public",
+        "module": "nodenext",
+        "target": "esnext",
+        "types": [
+            "node"
+        ],
+        "noUncheckedIndexedAccess": true,
+        "exactOptionalPropertyTypes": true,
+        "strict": true,
+        "jsx": "react-jsx",
+        "verbatimModuleSyntax": true,
+        "isolatedModules": true,
+        "noUncheckedSideEffectImports": true,
+        "moduleDetection": "force",
+        "skipLibCheck": true,
+    },
+    "include": [
+        "**/*.ts",
+    ],
+    "references": [
+        {
+            "path": "../share"
+        }
+    ]
+}

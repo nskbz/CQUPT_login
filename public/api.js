@@ -1,38 +1,43 @@
 // API服务模块
-class ApiService {
-    // 登录API调用
+export class ApiService {
     async login(userInfo) {
         try {
-            // 这里可以替换为实际的远程服务器URL
             const url = 'http://localhost:8081/login';
-
-            // 构建请求参数
-            const formData = new FormData();
-            formData.append('username', userInfo.username);
-            formData.append('password', userInfo.password);
-            formData.append('operator', userInfo.operator);
-            formData.append('device', userInfo.device);
-
-            // 发送POST请求
+            const loginRequest = {
+                account: userInfo.username,
+                passwd: userInfo.password,
+                device: this.parseDevice(userInfo.device),
+                isp: userInfo.operator,
+            };
             const response = await fetch(url, {
                 method: 'POST',
-                body: formData
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify(loginRequest)
             });
-
-            // 解析响应
-            const data = await response.json();
-
-            // 返回响应数据
-            return data;
-        } catch (error) {
+            const loginResponse = await response.json();
+            const res = { success: loginResponse.code > 0 ? false : true, msg: "可以冲浪了" };
+            if (loginResponse.code == 1) {
+                res.msg = "账户还是密码有问题";
+            }
+            else if (loginResponse.code == 2) {
+                res.msg = "运营商对头不";
+            }
+            return res;
+        }
+        catch (error) {
             console.error('登录API调用失败:', error);
-            // 失败时返回错误信息
             return {
                 success: false,
-                message: '网络错误，请稍后重试'
+                msg: '网络错误，请稍后重试'
             };
         }
     }
+    parseDevice(device) {
+        switch (device) {
+            case "mobile":
+                return 1;
+            default:
+                return 0;
+        }
+    }
 }
-
-export default ApiService;

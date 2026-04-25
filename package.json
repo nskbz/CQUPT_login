@@ -1,9 +1,12 @@
 {
   "type": "module",
   "devDependencies": {
-    "@types/node": "^25.6.0"
+    "@types/node": "^25.6.0",
+    "typescript": "^6.0.2"
   },
   "scripts": {
-    "web-ui": "node ./dist/index.js"
+    "dev": "node ./dist/index.js",
+    "start": "npm run build && npm run dev",
+    "build": "rm -rf dist && npx tsc -b"
   }
 }

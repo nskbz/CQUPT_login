@@ -1,11 +1,14 @@
 import * as http from 'http';
 import * as fs from 'fs';
 import * as path from 'path';
+import type { LoginRequest, LoginResponse } from '../share/types.js';
+import { buildLoginRequest, login } from './login.js';
+import * as mynet from "./net.js"
 
 export type Method = "GET" | "POST"
 
 export interface Handler {
-    method: Method
+    method: Method//该Handler支持的方法类型
     handle: (req: http.IncomingMessage, res: http.ServerResponse) => void
 }
 
@@ -20,7 +23,7 @@ export class MyServer {
 
     constructor(port: number, staticPath: string, path?: string) {
         this.public = staticPath
-        this.path = path ? path : ""
+        this.path = path ? path : ""//默认没路径 ''
         this.port = port
 
         this.types = new Map<string, string>()
@@ -93,32 +96,10 @@ export class MyServer {
             return { localPath: "", mimeType: `don't support type => ${extname}` }
         }
 
-        // // 处理favicon.ico
-        // // http://host:port/favicon.ico
-        // if (url == path.sep + "favicon.ico") {
-        //     return {
-        //         localPath: path.join(this.public, "favicon.ico"),
-        //         mimeType: "image/ico"
-        //     }
-        // }
-
         let prefix = ""
         if (this.path !== "") {
             prefix = path.sep.concat(this.path)// '/{this.path}'
         }
-
-        // 处理特殊的url,统一返回index.html
-        // http://host:port
-        // http://host:port/
-        // or
-        // http://host:port/{this.path}
-        // http://host:port/{this.path}/
-        // if (url == prefix || url == prefix.concat(path.sep)) {
-        //     return {
-        //         localPath: path.join(this.public, "index.html"),
-        //         mimeType: "text/html"
-        //     }
-        // }
 
         // url去除{this.path}虚拟路径
         if (url.startsWith(prefix, 0)) {
@@ -191,6 +172,64 @@ export class MyServer {
 export const LoginHandler: Handler = {
     method: "POST",
     handle: (req, res) => {
-        res.writeHead(200).end("You are jack!")
+        const url = req.url as string
+        if (req.headers['content-type'] != "application/json") {
+            res.writeHead(403).end("only support mimetype(application/json)")
+            console.log(`ERR(${url}): only support mimetype(application/json)`)
+            return
+        }
+
+        let data = ""
+        req.on("data", (chunk) => {
+            data += chunk
+        })
+
+        req.on("end", async () => {
+            try {
+                const loginReq: LoginRequest = JSON.parse(data)
+                //探测服务器是否正常工作
+                const probeIp = await mynet.tcpProbe(801, "192.168.200.2")
+                console.log(`has probed WLAN IP : ${probeIp}`)
+
+                //找出WLAN IP对应MAC地址
+                const ifaces = mynet.getIfaces()
+                let ip: string = ""
+                let mac: string = ""
+                for (const i of ifaces) {
+                    if (i.ip == probeIp) {
+                        ip = i.ip
+                        mac = i.mac
+                        console.log(`use IP->MAC : ${ip} -> ${mac}`)
+                        break
+                    }
+                }
+                const req = buildLoginRequest(
+                    loginReq.account,
+                    loginReq.passwd,
+                    loginReq.device,
+                    loginReq.isp,
+                    ip,
+                    mac
+                )
+                const result = await login(req)
+                const loginRes: LoginResponse = {
+                    code: 0,
+                    msg: "成功"
+                }
+                if (result.data?.result == 0 && result.data.ret_code == 1) {
+                    loginRes.code = 1
+                    if (result.data.msg == "unbind isp uid") {
+                        loginRes.code = 2
+                    }
+                    loginRes.msg = "失败"
+                }
+
+                res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify(loginRes))
+                console.log(`OK(${url}): handled!`)
+            } catch (err) {
+                res.writeHead(500).end("internal error happened!")
+                console.log(`ERR(${url}): ${err}`)
+            }
+        })
     }
 }

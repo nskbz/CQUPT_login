@@ -1,25 +1,16 @@
 import http from 'http'
-import type { DeviceType, ISP } from './types.js'
+import type { DeviceType, ISP } from '../share/types.js'
 
 // result=0 & ret_code=1 : 密码或账户错误
 // result=0 & ret_code=2 : 已经登陆
 // result=1 : 登陆成功
-export type LoginResponse = {
+type LoginResponse = {
     status: number,
     data?: {
         result: number,
         msg: string,
         ret_code?: number
     }
-}
-
-type Request = {
-    account: string
-    passwd: string
-    dt: DeviceType
-    isp: ISP
-    ip: string
-    mac: string
 }
 
 interface LoginRequest {
@@ -64,7 +55,7 @@ export function buildLoginRequest(
     }
 }
 
-export function login(params: Request): Promise<LoginResponse> {
+export function login(params: LoginRequest): Promise<LoginResponse> {
     return new Promise((resolve, reject) => {
         let url = `http://192.168.200.2:801/eportal/`
             + `?c=Portal&a=login&callback=dr1003&login_method=1`
