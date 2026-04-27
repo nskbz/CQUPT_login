@@ -1,7 +1,7 @@
 import * as http from 'http';
 import * as fs from 'fs';
 import * as path from 'path';
-import type { LoginRequest, LoginResponse } from '../share/types.js';
+import { LoginCode, type LoginRequest, type LoginResponse } from '../share/types.js';
 import { buildLoginRequest, login } from './login.js';
 import * as mynet from "./net.js"
 
@@ -213,13 +213,13 @@ export const LoginHandler: Handler = {
                 )
                 const result = await login(req)
                 const loginRes: LoginResponse = {
-                    code: 0,
+                    code: LoginCode.SUCCESS,
                     msg: "成功"
                 }
                 if (result.data?.result == 0 && result.data.ret_code == 1) {
-                    loginRes.code = 1
+                    loginRes.code = LoginCode.ERR_PASSWD_OR_ACCOUNT
                     if (result.data.msg == "unbind isp uid") {
-                        loginRes.code = 2
+                        loginRes.code = LoginCode.ERR_FAILED_ISP_BIND
                     }
                     loginRes.msg = "失败"
                 }

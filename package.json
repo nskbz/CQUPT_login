@@ -5,8 +5,9 @@
     "typescript": "^6.0.2"
   },
   "scripts": {
-    "dev": "node ./dist/index.js",
+    "dev": "node ./dist/src/index.js",
     "start": "npm run build && npm run dev",
-    "build": "npx tsc -b"
+    "build": "bash build.sh",
+    "clean": "rm -rf dist"
   }
 }

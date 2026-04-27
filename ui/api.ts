@@ -1,4 +1,4 @@
-import type { DeviceType, ISP, LoginRequest, LoginResponse } from '../share/types.js'
+import { LoginCode, type DeviceType, type ISP, type LoginRequest, type LoginResponse } from '../share/types.js'
 import type { UserInfo } from './types.js';
 
 // API响应接口
@@ -28,10 +28,10 @@ export class ApiService {
 
             const loginResponse: LoginResponse = await response.json()
             const res = { success: loginResponse.code > 0 ? false : true, msg: "可以冲浪了" }
-            if (loginResponse.code == 1) {
+            if (loginResponse.code == LoginCode.ERR_PASSWD_OR_ACCOUNT) {
                 res.msg = "账户还是密码有问题"
-            } else if (loginResponse.code == 2) {
-                res.msg = "运营商对头不"
+            } else if (loginResponse.code == LoginCode.ERR_FAILED_ISP_BIND) {
+                res.msg = "运营商不对头"
             }
             return res
         } catch (error) {

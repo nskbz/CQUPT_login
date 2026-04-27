@@ -3,7 +3,7 @@
         "composite": true,
         "declaration": true,
         "stripInternal": true,
-        "outDir": "../dist/share",
+        "outDir": "dist",
         "module": "nodenext",
         "target": "esnext",
         "types": [

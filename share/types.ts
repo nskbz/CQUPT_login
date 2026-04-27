@@ -10,11 +10,17 @@ export interface LoginRequest {
     device: DeviceType
 }
 
+// 0 => success ; 
+// 1 => passwd or account error ;
+// 2 => failed to bind the isp ;
+export enum LoginCode {
+    SUCCESS,
+    ERR_PASSWD_OR_ACCOUNT,
+    ERR_FAILED_ISP_BIND
+}
+
 export interface LoginResponse {
-    // 0 => success ; 
-    // 1 => passwd or account error ;
-    // 2 => failed to bind the isp ;
-    code: 0 | 1 | 2
+    code: LoginCode
     msg: string
     data?: any
 }
